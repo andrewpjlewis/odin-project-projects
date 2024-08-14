@@ -1,3 +1,10 @@
+const rockButton = document.getElementById('rock');
+const paperButton = document.getElementById('paper');
+const scissorsButton = document.getElementById('scissors');
+const div = document.getElementById('results')
+
+
+
 // function to get computer's play of rock, paper or scissors
 function getComputerChoice() {
     let randomNumber = Math.random();
@@ -12,55 +19,58 @@ function getComputerChoice() {
 
 // function for player to choose rock, paper or scissors
 function getHumanChoice () {
-    let humanChoice = prompt("Choose rock, paper or scissors:").toLowerCase(); // case insensitive
-    while (humanChoice !== "rock" && humanChoice !== "paper" && humanChoice !== "scissors") {
-        alert("Invalid choice. Please select one of Rock, Paper or Scissors.");
-        humanChoice = prompt("Choose Rock, Paper or Scissors:").toLowerCase();
-    }
-    return humanChoice
+    return new Promise((resolve) => {
+        rockButton.addEventListener('click', () => resolve('rock'));
+        paperButton.addEventListener('click', () => resolve('paper'));
+        scissorsButton.addEventListener('click', () => resolve('scissors'));
+    });    
 }
 
 // function to play 5 rounds of game
-function playGame() {
+async function playGame() {
     let computerScore = 0;
     let humanScore = 0;
     let draws = 0;
 
-    // function to enable a round to be played
-    function playRound(computerChoice, humanChoice) {
-        console.log("Computer: " + computerChoice);
-        console.log("You: " + humanChoice);
+    for (let round = 1; round <= 5; round++) {
+        const computerChoice = getComputerChoice();
+        const humanChoice = await getHumanChoice();
+
+        div.innerHTML = `<h2>Round ${round}</h2>`;
+        div.innerHTML += `<p>Computer chose: ${computerChoice}</p>`;
+        div.innerHTML += `<p>You chose: ${humanChoice}</p>`;
 
         if (computerChoice === humanChoice) {
-            console.log("It's a draw!");
-            draws ++;
-        } else if ((computerChoice === "rock" && humanChoice === "paper") 
-                || (computerChoice === "paper" && humanChoice === "scissors") 
-                || (computerChoice === "scissors" && humanChoice === "rock")) {
-            console.log("You win!");
-            humanScore ++;
+            div.innerHTML += "<p>It's a draw!</p>";
+            draws++;
+        } else if (
+            (computerChoice === "rock" && humanChoice === "paper") ||
+            (computerChoice === "paper" && humanChoice === "scissors") ||
+            (computerChoice === "scissors" && humanChoice === "rock")
+        ) {
+            div.innerHTML += "<p>You win this round!</p>";
+            humanScore++;
         } else {
-            console.log("Computer wins :(");
-            computerScore ++;
+            div.innerHTML += "<p>Computer wins this round.</p>";
+            computerScore++;
         }
-        console.log("Score is " + humanScore + ":" + computerScore);
+
+        div.innerHTML += `<p>Score: You ${humanScore} - ${computerScore} Computer</p>`;
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds before the next round
     }
 
-    // play 5 rounds
-    for (let i = 1; i <= 5; i++) {
-        let computerChoice = getComputerChoice();
-        let humanChoice = getHumanChoice();
-
-        console.log(playRound(computerChoice, humanChoice));
-    }
-
-    // print final score to screen
-    console.log("You won " + humanScore + " and drew " + draws + " out of 5 rounds.")
+    // Print final score to the screen
+    div.innerHTML += `<h2>Final Score:</h2>`;
+    div.innerHTML += `<p>You won ${humanScore} and drew ${draws} out of 5 rounds.</p>`;
 
     if (computerScore > humanScore) {
-        console.log("Bad luck! Computer wins!")
-    } else {console.log("Yay! You win!")}
+        div.innerHTML += `<p>Bad luck! Computer wins the game!</p>`;
+    } else if (humanScore > computerScore) {
+        div.innerHTML += `<p>Yay! You win the game!</p>`;
+    } else {
+        div.innerHTML += `<p>It's a tie overall!</p>`;
+    }
 }
 
 // run the game
-console.log(playGame())
+playGame()
